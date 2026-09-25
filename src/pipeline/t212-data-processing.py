@@ -62,15 +62,6 @@ DIM_DATE_PATH = "s3://financial-dataflow/data/gold/dim_date/"
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-# Optional backfill window, parsed separately from getResolvedOptions
-# since getResolvedOptions treats every listed arg as required.
-_parser = argparse.ArgumentParser(add_help=False)
-_parser.add_argument("--START_DATE", default=None, help="YYYY-MM-DD, backfill start (inclusive)")
-_parser.add_argument("--END_DATE", default=None, help="YYYY-MM-DD, backfill end (inclusive). Defaults to today if omitted.")
-BACKFILL_ARGS, _ = _parser.parse_known_args(sys.argv[1:])
-IS_BACKFILL = bool(BACKFILL_ARGS.START_DATE)
-
-
 # ---------------------------------------------------------------------
 # Watermark helpers (same pattern as bronze -> silver, separate state file)
 # ---------------------------------------------------------------------
@@ -88,12 +79,12 @@ def set_watermark(new_date: date) -> None:
     logger.info("Watermark advanced to %s", new_date)
 
 
-def dates_to_process() -> List[date]:
-    if IS_BACKFILL:
-        start = pd.to_datetime(BACKFILL_ARGS.START_DATE).date()
+def dates_to_process(from_date, to_date, is_backfill) -> List[date]:
+    if is_backfill:
+        start = pd.to_datetime(from_date).date()
         end = (
-            pd.to_datetime(BACKFILL_ARGS.END_DATE).date()
-            if BACKFILL_ARGS.END_DATE
+            pd.to_datetime(to_date).date()
+            if to_date
             else date.today()
         )
         logger.info("Backfill mode: %s to %s (watermark will NOT be updated)", start, end)
@@ -384,12 +375,17 @@ def build_fact_positions(from_date: str, to_date: str) -> pd.DataFrame:
     ORDER BY p.ingested_date ;
     """
 
-    fact = wr.athena.read_sql_query(
-        sql=sql,
-        database=GLUE_DATABASE,
-        s3_output="s3://financial-dataflow/query-results/"
-    )
-    return fact
+    try:
+        fact = wr.athena.read_sql_query(
+            sql=sql,
+            database=GLUE_DATABASE,
+            s3_output="s3://financial-dataflow/query-results/"
+        )
+
+        return fact
+    except Exception as e:
+        logger.info(e, exc_info=True)
+        raise e
 
 
 def write_fact_positions(df: pd.DataFrame) -> None:
@@ -429,8 +425,14 @@ def write_dim_date(df: pd.DataFrame) -> None:
     )
 
 
-def main() -> None:
-    dates = dates_to_process()
+def main(event) -> None:
+    
+    from_date = event.get("from_date")
+    to_date = event.get("to_date")
+    is_backfill = bool(from_date)
+    
+    
+    dates = dates_to_process(from_date, to_date, is_backfill)
     if not dates:
         logger.info("No new partitions to process. Exiting.")
         return
@@ -454,7 +456,7 @@ def main() -> None:
     fact_t212_positions = build_fact_positions(from_date, to_date)
     write_fact_positions(fact_t212_positions)
 
-    if not IS_BACKFILL:
+    if not is_backfill:
         # Deliberately max(dates) - 1, not max(dates): today (always
         # the last entry in dates, see dates_to_process) must stay
         # reprocessable by later runs the same day, so the watermark
@@ -463,6 +465,20 @@ def main() -> None:
 
     logger.info("Job complete. Dates processed: %s", [d.isoformat() for d in dates])
 
+def lambda_handler(event, context):
+    main(event)
+    
+    return {
+        "statusCode": 200,
+        # "records": total_records,
+        # "endpoints": endpoint_metrics,
+        # "duration_seconds": round(total_duration, 2)
+    }
 
 if __name__ == "__main__":
-    main()
+    event = {
+    "from_date": "2026-08-15",
+    "to_date": "2026-08-25"
+    }
+    main(event)
+
