@@ -15,7 +15,7 @@ Tech Stack
 
 ## Architecture
 
-![alt text](<./docs/architecture-diagram.jpg>)
+![alt text](<./docs/img/architecture-diagram.jpg>)
 
 ## Terraform installation
 
