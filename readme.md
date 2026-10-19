@@ -13,6 +13,10 @@ Tech Stack
 - Grafana
 - Python
 
+## Architecture
+
+![alt text](<./docs/architecture-diagram.jpg>)
+
 ## Terraform installation
 
 ```txt
@@ -56,3 +60,21 @@ aws s3api put-public-access-block \
   cd terraform/environments/dev
   terraform init 
 ```
+
+## Troubleshooting
+
+### Multiple DCA Market Other
+
+`t212-dca` fired multiple trade. Issue linked to s3 event. Given that multiple files can be written to s3 per a single consumption of the API endpoint, this triggers the automated dca process multiple times.
+
+#### fix
+
+- Add a lock to dca script. Check that asset hasn't been purchased within a suitable time interval.
+- Orchestrate workflow using `step function`
+
+#### TODO
+
+-[] POC step function - Set up on AWS console
+-[] Remove s3 event triggers
+-[] Document architecural change
+-[] Update Terraform
