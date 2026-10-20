@@ -29,6 +29,7 @@ Data platform to ingest asset data from trading 212
 - Terraform Block
 - Terraform
 - Variable Blocks
+- Write, Plan, Apply
 
 ## TODO
 
@@ -36,12 +37,6 @@ Data platform to ingest asset data from trading 212
 - [x] Remove s3 event triggers
 - [ ] Document architecural change
 - [ ] Update Terraform
-
-### Setup Function
-
-- Create a state machine
-- Specify flow in GUI
-- Specify role
 
 ## Architecture
 
@@ -99,7 +94,7 @@ aws s3api put-public-access-block \
 
 ```
 
-**Add backedn:**
+**Add Backend:**
 
 **Initialize terraform:**
 
@@ -107,6 +102,14 @@ aws s3api put-public-access-block \
   cd terraform/environments/dev
   terraform init 
 ```
+
+### Setup Step Function
+
+- Create a State machine
+- Specify flow in GUI
+- Specify Role, allow lambda invocation, SNS Publish
+- Add Event Bridge Schedule
+- Add identity role access to execute a state machine (policy, role)
 
 ## Troubleshooting / Incident Fix
 
