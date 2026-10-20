@@ -1,8 +1,48 @@
-# ReadMe
+# README
 
-**Overview:** Data pipeline to ingest asset data from trading 212
+## Overview
 
-Tech Stack
+Data platform to ingest asset data from trading 212
+
+## Domain
+
+- Data Engineering
+- Data Analysis
+- Development Operations
+
+## Glossary
+
+- Block syntax
+- Block Types
+- Declarative
+- HCL
+- IAC
+- Idempotency
+- Local Blocks
+- Output Blocks
+- Resource Block
+- Terraform Data Sources
+- Provider Block
+- Provider plugin
+- Source control
+- State data
+- Terraform Block
+- Terraform
+- Variable Blocks
+- Write, Plan, Apply
+
+## TODO
+
+- [x] POC step function - Set up on AWS console
+- [x] Remove s3 event triggers
+- [ ] Document architecural change
+- [ ] Update Terraform
+
+## Architecture
+
+![alt text](<./docs/img/architecture-diagram.jpg>)
+
+### Tech Stack
 
 - Event Schedular
 - Lambda
@@ -13,7 +53,13 @@ Tech Stack
 - Grafana
 - Python
 
-## Terraform installation
+## Design
+
+**Design Here:**
+
+## Setup and Installations
+
+### Terraform Installation
 
 ```txt
 brew install tfenv
@@ -48,7 +94,7 @@ aws s3api put-public-access-block \
 
 ```
 
-**Add backedn:**
+**Add Backend:**
 
 **Initialize terraform:**
 
@@ -56,3 +102,24 @@ aws s3api put-public-access-block \
   cd terraform/environments/dev
   terraform init 
 ```
+
+### Setup Step Function
+
+- Create a State machine
+- Specify flow in GUI
+- Specify Role, allow lambda invocation, SNS Publish
+- Add Event Bridge Schedule
+- Add identity role access to execute a state machine (policy, role)
+
+## Troubleshooting / Incident Fix
+
+### Incident 1
+
+#### 38 DCA Market Order Place on a single run
+
+`t212-dca` fired multiple trade. Issue linked to s3 event. Given that multiple files can be written to s3 per a single consumption of the API endpoint, this triggers the automated dca process multiple times.
+
+#### Fix
+
+- Add a lock to dca script. Check that asset hasn't been purchased within a suitable time interval.
+- Orchestrate workflow using `Aws Step Function`
