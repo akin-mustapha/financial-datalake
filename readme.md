@@ -16,12 +16,15 @@ Data platform to ingest asset data from trading 212
 - Block Types
 - Declarative
 - HCL
+- Heredoc syntax (`<<EOF ..Text EOF`)
 - IAC
 - Idempotency
 - Local Blocks
+- Lock file
 - Output Blocks
 - Resource Block
 - Terraform Data Sources
+- Terraform Plan Symbols
 - Provider Block
 - Provider plugin
 - Source control
