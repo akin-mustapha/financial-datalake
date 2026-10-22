@@ -71,6 +71,9 @@ Data platform to ingest asset data from trading 212
 
 ### Terraform Installation
 
+[Terraform Docs](https://developer.hashicorp.com/terraform/docs)
+[Step Function IAC](https://docs.aws.amazon.com/step-functions/latest/dg/terraform-sfn.html)
+
 ```txt
 brew install tfenv
 tfenv install latest
