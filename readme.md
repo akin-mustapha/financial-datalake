@@ -41,6 +41,16 @@ Data platform to ingest asset data from trading 212
 - [ ] Document architecural change
 - [ ] Update Terraform
 
+## Project Management
+
+**Board:** [Project Board](https://github.com/users/akin-mustapha/projects/13)
+
+**Use Case:**
+
+**Architecture:**
+
+**Design:**
+
 ## Architecture
 
 ![alt text](<./docs/img/architecture-diagram.jpg>)
@@ -63,6 +73,9 @@ Data platform to ingest asset data from trading 212
 ## Setup and Installations
 
 ### Terraform Installation
+
+[Terraform Docs](https://developer.hashicorp.com/terraform/docs)
+[Step Function IAC](https://docs.aws.amazon.com/step-functions/latest/dg/terraform-sfn.html)
 
 ```txt
 brew install tfenv
