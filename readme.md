@@ -37,6 +37,7 @@ Data platform to ingest asset data from trading 212
 - [x] Remove s3 event triggers
 - [ ] Document architecural change
 - [ ] Update Terraform
+- [ ] POC observability - cloud watch log, metrics and alarms
 
 ## Project Management
 
