@@ -2,7 +2,7 @@
 data "archive_file" "this" {
   type             = "zip"
   source_file      = var.source_file
-  output_path      = "${path.module}/build/${var.function_name}.zip"
+  output_path      = "${path.root}/build/${var.function_name}.zip"
   output_file_mode = "0644"
 }
 
@@ -12,8 +12,8 @@ resource "aws_lambda_function" "this" {
   handler       = var.handler
   runtime       = var.runtime
 
-  filename      = var.filename
-  source_code_hash = filebase64sha256(var.filename)
+  filename         = data.archive_file.this.output_path
+  source_code_hash = data.archive_file.this.output_base64sha256
 
   timeout       = var.timeout
   memory_size   = var.memory_size
