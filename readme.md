@@ -128,6 +128,27 @@ aws s3api put-public-access-block \
 - Add Event Bridge Schedule
 - Add identity role access to execute a state machine (policy, role)
 
+### Setup Grafana for Cloud Watch Metric
+
+#### Configure Assumed Role for Grafana
+
+1. Create new role on AWS
+2. Attach `AmazonGrafanaCloudWatchAccess` policy
+
+#### Add new Data Source
+
+1. Add assumed role ARN to data source - `arn:aws:iam::861580917950:role/grafana-assumed-role`
+
+```txt
+1. CloudWatch metrics query failed: operation error CloudWatch: ListMetrics, https response error StatusCode: 403, RequestID: ceeac963-7b2d-41b3-aab2-3f7e57ae044b, api error AccessDenied: UnknownError 2. CloudWatch logs query failed: operation error CloudWatch Logs: DescribeLogGroups, https response error StatusCode: 400, RequestID: ec45db2b-04ce-4c22-a974-26772a337a43, api error AccessDeniedException: User: arn:aws:iam::008923505280:user/aws-temp-creds-prod-eu-west-6-grafana-datasources is not authorized to perform: logs:DescribeLogGroups on resource: arn:aws:logs:eu-west-1:008923505280:log-group::log-stream: because no identity-based policy allows the logs:DescribeLogGroups action
+```
+
+```txt
+1. CloudWatch metrics query failed: operation error CloudWatch: ListMetrics, get identity: get credentials: failed to refresh cached credentials, operation error STS: AssumeRole, https response error StatusCode: 403, RequestID: 73f91367-d0e6-4889-88f2-f4bce2246546, api error AccessDenied: User: arn:aws:iam::008923505280:user/aws-temp-creds-prod-eu-west-6-grafana-datasources is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::861580917950:role/grafana-assumed-role 
+
+2. CloudWatch logs query failed: operation error CloudWatch Logs: DescribeLogGroups, get identity: get credentials: failed to refresh cached credentials, operation error STS: AssumeRole, https response error StatusCode: 403, RequestID: ed7f67d2-fce0-478f-9a22-e71b296643aa, api error AccessDenied: User: arn:aws:iam::008923505280:user/aws-temp-creds-prod-eu-west-6-grafana-datasources is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::861580917950:role/grafana-assumed-role  
+```
+
 ## Troubleshooting / Incident Fix
 
 ### Incident 1
