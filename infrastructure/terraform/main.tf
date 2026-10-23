@@ -17,6 +17,53 @@ module "t212_secret" {
 
 }
 
+// Schedule
+
+module "europe_open" {
+  source     = "./modules/event_bridge_schedule"
+  name       = "financial-dataflow-europe-open"
+  group_name = "default"
+
+  flexible_time_window = "OFF"
+
+  schedule_expression          = "cron(20 8 * * ? *)"
+  schedule_expression_timezone = "Europe/Dublin"
+
+  target_arn      = aws_lambda_function.pipeline["ingestion"].arn
+  target_role_arn = aws_iam_role.financial_dataflow.arn
+  target_input    = "europe-open" 
+}
+
+module "midday" {
+  source     = "./modules/event_bridge_schedule"
+  name       = "financial-dataflow-midday"
+  group_name = "default"
+
+  flexible_time_window = "OFF"
+
+  schedule_expression          = "cron(20 13 * * ? *)"
+  schedule_expression_timezone = "Europe/Dublin"
+
+  target_arn      = aws_lambda_function.pipeline["ingestion"].arn
+  target_role_arn = aws_iam_role.financial_dataflow.arn
+  target_input    = "midday" 
+}
+
+module "us_close" {
+  source     = "./modules/event_bridge_schedule"
+  name       = "financial-dataflow-us-close"
+  group_name = "default"
+
+  flexible_time_window = "OFF"
+
+  schedule_expression          = "cron(30 16 * * ? *)"
+  schedule_expression_timezone = "Europe/Dublin"
+
+  target_arn      = aws_lambda_function.pipeline["ingestion"].arn
+  target_role_arn = aws_iam_role.financial_dataflow.arn
+  target_input    = "us-close" 
+}
+
 // Compute resources
 
 module "ingestion_lambda" {
@@ -67,25 +114,20 @@ module "dca_lambda" {
   memory_size   = 512
 }
 
-
 // Database
 
 module "trade_log" {
-  source = "./modules/dynamodb"
-
+  source       = "./modules/dynamodb"
   table_name   = "trade_log"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "trade_id"
-
-
-  attributes = [
+  attributes   = [
     {
       name = "trade_id"
       type = "S"
     }
   ]
 }
-
 
 // Monitoring
 
