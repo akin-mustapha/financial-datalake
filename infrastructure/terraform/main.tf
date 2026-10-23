@@ -5,15 +5,14 @@ provider "aws" {
 // Storage
 
 module "s3" {
-  source = "./modules/s3"
+  source      = "./modules/s3"
   bucket_name = "financial-dataflow"
 }
 
 // Secret Manager
 
 module "t212_secret" {
-  source = "./modules/secret_manager"
-
+  source      = "./modules/secret_manager"
   secret_name = "prod/financial-dataflow/trading212"
 
 }
@@ -71,12 +70,12 @@ module "dca_lambda" {
 
 // Database
 
-module trade_log {
+module "trade_log" {
   source = "./modules/dynamodb"
 
-  table_name = "trade_log"
+  table_name   = "trade_log"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key = "trade_id"
+  hash_key     = "trade_id"
 
 
   attributes = [
@@ -85,4 +84,27 @@ module trade_log {
       type = "S"
     }
   ]
+}
+
+
+// Monitoring
+
+module "ingestion-errors" {
+  source              = "./modules/cloud_watch_alarm"
+  alarm_name          = "financial-dataflow-ingestion-errors"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 0
+  alarm_description   = "Fires when financial-dataflow-ingestion has any invocation errors"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    FunctionName = aws_lambda_function.pipeline["ingestion"].function_name
+  }
+
+  alarm_actions = [aws_sns_topic.pipeline_alerts.arn]
 }
