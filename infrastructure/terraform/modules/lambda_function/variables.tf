@@ -1,3 +1,8 @@
+variable "source_file" {
+  description = "The path to the source file for the Lambda function"
+  type        = string
+}
+
 variable "function_name" {
   description = "The name of the Lambda function"
   type        = string
